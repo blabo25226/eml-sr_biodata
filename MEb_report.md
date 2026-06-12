@@ -29,7 +29,7 @@
 
 ### 解析用Pythonスクリプト
 * `lacroix/lacroix_grammar_search_ode.py`: LaCroixのデータに対してEML文法探索を行い、一次緩和常微分方程式(ODE)に当てはめるスクリプト。論文の **Fig. 1** を生成します。
-* **`eml_grammar_search.py` (Nandaの代表的スクリプト)**: Nandaの4つのRho-GTPase応答データに対し、EML文法を用いた「制約付きシンボリック回帰（symbolic-regression）探索」を行う中心的なスクリプトです。木構造の数式（例: `E ::= R | G(E) | E + E`）を列挙・フィッティングし、wMSEやAIC/BICでモデルを評価します。論文の **Fig. 2** を生成します。
+* `eml_grammar_search.py`: Nandaの4つのRho-GTPase応答データに対し、EML文法を用いた「制約付きシンボリック回帰（symbolic-regression）探索」を行う中心的なスクリプトです。木構造の数式（例: `E ::= R | G(E) | E + E`）を列挙・フィッティングし、wMSEやAIC/BICでモデルを評価します。論文の **Fig. 2** を生成します。
 * `hill_grammar_search.py`: 比較検証として、Nandaのデータに対して従来のヒル関数を用いた探索を行うスクリプト。論文の **Fig. 3** を生成します。
 * `toy/toy_coarse_graining_benchmark.py`: 50状態の複雑な活性化-適応ネットワークをシミュレートし、それをEMLカスケードによって低次元に圧縮（粗視化）できるかを検証するスクリプト。論文の **Fig. 4** を生成します。
 
