@@ -1,0 +1,1 @@
+The R software script that served as the foundation for the analyses presented in the study titled 'Epigenetic Predictors of Species Maximum Lifespan and Other Life History Traits in Mammals' by Caesar Li and colleagues has been published in 2024, in the journal Science Advances.

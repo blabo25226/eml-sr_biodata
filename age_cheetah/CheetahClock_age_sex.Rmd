@@ -1,0 +1,643 @@
+---
+title: "CheetahClock_age_sex"
+output: html_notebook
+---
+# Data import and processing
+
+Import data and load packages
+```{r}
+setwd("C:/Users/mysrael/Documents/HorvathClockR/Cheetah/Horvath_data")
+
+# Load packages
+library(glmnet)
+library(ggplot2)
+library(DescTools)
+
+# Methylation data submission 1 (corrected)
+beta_sesame1 <- readRDS('beta_sesame_shifted.RDS')
+
+# Methylation data submission 2 
+data_sesame2 <- readRDS('NormalizedData2/data_sesame.RDS')
+beta_sesame2 <- t(data_sesame2$beta)
+beta_sesame2 <- as.data.frame(beta_sesame2)
+
+# Cheetah metadata
+cheetah_info <- read.csv("cheetah_metadata_vod2.csv")
+
+# Extract liver SIDs
+liver_sids <- cheetah_info$SID[cheetah_info$Tissue == "Liver"]
+
+# Subset methylation data: liver
+beta_sesame1_liver <- beta_sesame1[rownames(beta_sesame1) %in% liver_sids, ]
+beta_sesame2_liver <- beta_sesame2[rownames(beta_sesame2) %in% liver_sids, ]
+
+# Merge to one liver df
+beta_sesame_liver <- rbind(beta_sesame1_liver, beta_sesame2_liver)
+```
+
+WCGNA UH clustering for for outliers
+```{r}
+# Load packages
+library(glmnet)
+library(WGCNA)
+
+# The following setting is important, do not omit.
+options(stringsAsFactors <- FALSE);
+methylation_liver <- as.data.frame(beta_sesame_liver)
+
+datExpr00 <- methylation_liver;
+
+# check for genes and samples with too many missing values:
+
+datExpr00[] <- lapply(datExpr00, function(x) {
+    as.numeric(as.character(x)) #make numeric
+})
+
+gsg <- goodSamplesGenes(datExpr00, verbose = 3);
+gsg$allOK
+
+# If the last statement returns TRUE, all genes have passed the cuts. If not, we remove the offending genes and samples from the data:
+if (!gsg$allOK)
+{
+# Optionally, print the gene and sample names that were removed:
+if (sum(!gsg$goodGenes)>0)
+printFlush(paste("Removing genes:", paste(names(datExpr00)[!gsg$goodGenes], collapse = ", ")));
+if (sum(!gsg$goodSamples)>0)
+printFlush(paste("Removing samples:", paste(rownames(datExpr00)[!gsg$goodSamples], collapse = ", ")));
+# Remove the offending genes and samples from the data:
+datExpr00 <- datExpr00[gsg$goodSamples, gsg$goodGenes]
+}
+
+#Next we cluster the samples (in contrast to clustering genes that will come later) to see if there are any obvious outliers.
+sampleTree <- hclust(dist(datExpr00), method = "average");
+# Plot the sample tree: Open a graphic output window of size 12 by 9 inches
+# The user should change the dimensions if the window is too large or too small.
+sizeGrWindow(12,9);
+par(cex = 0.6);
+par(mar = c(0,4,2,0))
+plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,
+cex.axis = 1.5, cex.main = 2)
+abline(h = 30, col = "red"); 
+```
+
+Remove outliers (clustering + stillborns)
+```{r}
+# Remove by hand:
+outlier_IDs <- c("ET0394TOX00092","ET0394TOX00094", "ET0394TOX00063","ET0394TOX00095", #outlier clustering
+                "ET0394TOX00084","ET0394TOX00080","ET0394TOX00069") #stillborns 
+
+beta_clock <- beta_sesame_clock[!(rownames(beta_sesame_clock) %in% outlier_IDs), ]
+
+# subset cheetah info to only have clock samples
+cheetah_info_clock <- cheetah_info[cheetah_info$SID %in% rownames(beta_clock), ]
+
+# arrange beta clock by cheetah_info_clock order
+beta_clock <- beta_clock[match(cheetah_info_clock$SID, rownames(beta_clock)), ]
+
+save(cheetah_info_clock, file= "cheetah_info_clock.RData")
+save(beta_clock, file= "beta_clock.RData")
+```
+
+Mammalian Consortium Data Browser (MCDB) methylation data import 
+```{r}
+# Cheetah blood MCDB data import 
+mammcon_cheetah_methdata <- read.csv("cheetah_mamconsortium_betas.csv")
+
+rownames(mammcon_cheetah_methdata) <- mammcon_cheetah_methdata$X
+mammcon_cheetah_methdata <- mammcon_cheetah_methdata[,-1]
+beta_sesame_mammcon <- as.data.frame(t(mammcon_cheetah_methdata))
+```
+
+SVA batch effects
+```{r}
+library(sva)
+
+sva_data0 <- ComBat(t(beta_clock), batch = cheetah_info_clock$study)
+sva_data <- t(sva_data0)
+
+pca_sva <- prcomp(sva_data, scale. = FALSE)
+
+summary(pca_sva)
+plot(pca_sva)
+```
+
+## CheetahClock for age prediction
+
+Age transformation:Needed to account for faster aging until age of sexual maturity reached
+ASM = age at sexual maturity, taken from AnAge
+Functions based on log-linear age for Clock 3 in universal DNA methylation age paper
+```{r}
+ASM <- 2
+age_transformed <- Vectorize(function(x, maturity=ASM) {
+  if (is.na(x) | is.na(maturity)) {return(NA)}
+  k <- 0.2
+  y <- 0
+  if (x < maturity) {y = log((x+k)/(maturity+k))}
+  else {y = (x-maturity)/(maturity+k)}
+  return(y)
+})
+```
+
+Inverse transformation 
+```{r}
+age_inv_transformed <- Vectorize(function(y, maturity=ASM) {
+  if (is.na(y) | is.na(maturity)) {return(NA)}
+  k <- 0.2
+  x <- 0
+  if (y < 0) {x = (maturity+k)*exp(y)-k}
+  else {x = (maturity+k)*y+maturity}
+  return(x)
+})
+```
+
+Make df with transformed ages
+```{r}
+age_trans = age_transformed(cheetah_info_clock$Age_yr,ASM)
+
+# DF with ID, age, age_trans + other metadata
+info_clock <- data.frame(cheetah_info_clock$SID,cheetah_info_clock$sex,cheetah_info_clock$Age_yr,age_trans)
+
+# change col names 
+colnames(info_clock) = c("SID","sex", "Age", "age_trans")
+```
+
+Elastic Net Regression with LOOCV
+```{r}
+# Variables
+alpha <- 0.5
+n <- length(age_trans) #number of samples
+
+EN_methylation_data <- t(sva_data)
+
+EN_age <- info_clock$age_trans
+
+# generate a lambda value using the "cv.glmnet()" function
+glmnet_cv_training <- cv.glmnet(EN_methylation_data, EN_age, alpha = alpha, family="gaussian", nfolds = n)
+
+# Display the optimal lambda
+best_lambda <- glmnet_cv_training$lambda.min
+cat("Optimal Lambda:", best_lambda, "\n")
+
+# LOOCV
+model_list <- list() # empty list to take in model iterations
+for (i in 1:nrow(info_clock)){
+  meth_data_loo <- EN_methylation_data[-i,]
+  age_data_loo <-EN_age[-i]
+  test_id <- as.matrix(EN_methylation_data[i,])
+  test_id <-t(test_id)
+  
+  fit <- glmnet(x=meth_data_loo, y=age_data_loo,lambda = best_lambda,alpha=alpha,family="gaussian")
+  model_list[[i]] <- fit #store model in list
+}
+
+# Calculate MSE for each model
+mse_values <- sapply(model_list, function(model) {
+  predictions <- predict(model, newx = EN_methylation_data, type = "response")
+  mean((predictions - EN_age)^2)
+})
+
+# Identify the index of the model with the minimum MSE
+best_model_index <- which.min(mse_values)
+
+# Access the best model
+best_model1 <- model_list[[best_model_index]]
+
+# Get age predictions using best_model
+y.best_model1 <- predict(best_model1,EN_methylation_data, type = "response")
+info_clock$DNAmoClockLOO <- y.best_model1
+
+# Save model
+saveRDS(best_model1, "CheetahClock_age.rds")
+```
+
+Check output
+```{r}
+# Inverse age function on output
+age_inv_trans <- age_inv_transformed(info_clock$DNAmoClockLOO,ASM)
+info_clock$age_inv_trans <- age_inv_trans
+
+# error LOOCV
+errorLOOCV <- info_clock$Age - info_clock$age_inv_trans
+MAE_LOOCV <- sqrt(median(errorLOOCV^2))
+MAE_LOOCV
+
+# pearson correlation LOOCV
+r_LOOCV <- cor(info_clock$Age, info_clock$age_inv_trans, method = "pearson")
+r_LOOCV
+
+#plot LOOCV
+Plot <- ggplot(info_clock, aes(x = Age, y = age_inv_trans)) +
+  ylim(0,20) + xlim(0,20) +
+  geom_point(shape=1, size=2) +
+  geom_smooth(method = "lm", se = FALSE, fullrange = TRUE, colour="deepskyblue4") +
+  geom_abline(intercept = 0, slope = 1, linetype = 3)+
+  theme_classic()+
+  theme(axis.title=element_blank(), axis.text = element_text(size=14, colour = "black"),);Plot
+```
+
+Inspect best_clock coefs
+```{r}
+#Inspect model coefficients (beta vals):
+coefs <- as.matrix(coef(best_model1, s = best_lambda))
+chosen_features <- rownames(coefs)[coefs !=0]
+print(coefs[chosen_features, , drop=FALSE])
+number_chosen_features <- length(chosen_features)
+cat("number of chosen CpG sites:", number_chosen_features, "\n")
+
+#save features
+cheetahclock_age_coefs <- chosen_features
+save(cheetahclock_age_coefs, file = "CheetahClock_age_coefs.Rdata")
+
+cpgs_coefs <- (coefs[chosen_features, , drop=FALSE])
+as.data.frame(cpgs_coefs)
+write.csv(cpgs_coefs, file = "CheetahClock_age_cpgs.csv", row.names = TRUE)
+```
+
+Assess clock
+```{r}
+# Plot age vs DNAm age
+a<-info_clock$Age
+b<-info_clock$age_inv_trans
+cor0<-round(cor(a,b),2)
+mae0<-round(median(abs(a-b)),2)
+plot(a,b,xlab='Age',ylab='DNAm age',
+     main=paste0('CheetahClock LOO Liver and Blood (n=',length(a),')\n','cor=',cor0,
+                 ', MAE=',mae0),
+     col='white',xlim=c(-1,max(max(a),max(b))+1),
+     ylim=c(-1,max(max(a),max(b))+1),
+     cex.lab = 1.25) #axis label size
+
+# Color ID labels
+ID = info_clock$SID
+label_colors = rep("blue", length(ID))
+
+# Color code by study
+ID_mammcon <- cheetah_info_clock$SID[cheetah_info_clock$study == "MammCon"]
+ID_sdzwa <- cheetah_info_clock$SID[cheetah_info_clock$study == "SDZWA"]
+
+mammcon_color = "sienna1"
+sdzwa_color = "green4"
+
+for (i in 1:length(ID)) {
+  if (ID[i] %in% ID_mammcon) {
+    label_colors[i] <- mammcon_color
+  } else if (ID[i] %in% ID_sdzwa) {
+    label_colors[i] <- sdzwa_color
+  }
+  points(a[i], b[i], col = label_colors[i], pch=16)
+}
+
+legend_labels <- c("MCDB blood","SDZWA liver")
+legend_colors <- c("sienna1","green4")
+legend("bottomright", legend = legend_labels, fill = legend_colors)
+
+abline(0,1,lwd=2,lty=2,col="grey")
+model1 <- lm(b~a)
+abline(model1,lwd=2,lty=2,col='black')
+```
+
+## CheetahClock age validation (submission 2 data)
+
+# SDZWA blood samples
+```{r}
+# Extract blood SIDs
+blood_sids <- cheetah_info$SID[cheetah_info$Tissue == "Blood" & cheetah_info$submission == 2]
+
+# Subset methylation data so only blood
+beta_test_blood <- beta_sesame2[rownames(beta_sesame2) %in% blood_sids, ]
+
+# subset cheetah info to only have blood samples
+cheetah_info_blood <- cheetah_info[cheetah_info$SID %in% rownames(beta_test_blood), ]
+
+# arrange by cheetah_info_blood order
+beta_test_blood <- beta_test_blood[match(cheetah_info_blood$SID, rownames(beta_test_blood)), ]
+```
+
+Quick check with WCGNA
+```{r}
+# The following setting is important, do not omit.
+options(stringsAsFactors = FALSE);
+methylation_blood <- as.data.frame(beta_test_blood)
+
+datExpr00 <- methylation_blood;
+
+# check for genes and samples with too many missing values:
+datExpr00[] <- lapply(datExpr00, function(x) {
+    as.numeric(as.character(x)) #make numeric
+})
+
+gsg <- goodSamplesGenes(datExpr00, verbose = 3);
+gsg$allOK
+
+# If the last statement returns TRUE, all genes have passed the cuts. If not, we remove the offending genes and samples from the data:
+if (!gsg$allOK)
+{
+# Optionally, print the gene and sample names that were removed:
+if (sum(!gsg$goodGenes)>0)
+printFlush(paste("Removing genes:", paste(names(datExpr00)[!gsg$goodGenes], collapse = ", ")));
+if (sum(!gsg$goodSamples)>0)
+printFlush(paste("Removing samples:", paste(rownames(datExpr00)[!gsg$goodSamples], collapse = ", ")));
+# Remove the offending genes and samples from the data:
+datExpr00 <- datExpr00[gsg$goodSamples, gsg$goodGenes]
+}
+
+#Next we cluster the samples (in contrast to clustering genes that will come later) to see if there are any obvious outliers.
+sampleTree <- hclust(dist(datExpr00), method = "average");
+# Plot the sample tree: Open a graphic output window of size 12 by 9 inches
+# The user should change the dimensions if the window is too large or too small.
+sizeGrWindow(12,9)
+par(cex = 0.6);
+par(mar = c(0,4,2,0))
+plot(sampleTree, main = "Blood Sample Clustering", sub="", xlab="", cex.lab = 1.5,
+cex.axis = 1.5, cex.main = 2)
+```
+
+Make blood info DF
+```{r}
+# subset cheetah info to only have blood samples
+cheetah_info_blood <- cheetah_info[cheetah_info$SID %in% rownames(beta_test_blood), ]
+
+# arrange by cheetah_info_blood order
+beta_test_blood <- beta_test_blood[match(cheetah_info_blood$SID, rownames(beta_test_blood)), ]
+```
+
+Test on blood
+```{r}
+# Run model on new data
+EN_test_blood <- as.matrix(beta_test_blood)
+y.blood <- predict(best_model1,EN_test_blood, type = "response")
+
+# Inverse age function on output
+y.blood_age_inv <- age_inv_transformed(y.blood,ASM)
+
+# Output DF
+output_blood <- data.frame(cheetah_info_blood$SID,cheetah_info_blood$Age_yr,y.blood,y.blood_age_inv)
+colnames(output_blood) <- c("SID", "Age", "s0", "Age_inv")
+
+# Plot age vs DNAm age
+a <- output_blood$Age
+b <- output_blood$Age_inv
+cor0 <- round(cor(a,b),2)
+mae0 <- round(median(abs(a-b)),2)
+plot(a,b,xlab='Age',ylab='DNAm age',
+     main=paste0('CheetahClock Test Blood (n=',length(a),')\n','cor=',cor0,
+                 ', MAE=',mae0),
+     col='darkgreen',xlim=c(-1,max(max(a),max(b))+1),
+     ylim=c(-1,max(max(a),max(b))+1),
+     cex.lab = 1.25) #axis label size
+
+points(a, b, col = 'darkgreen', pch=16, cex=1.25)
+abline(0,1,lwd=2,lty=2,col="grey")
+model1<-lm(b~a)
+abline(model1,lwd=,lty=2,col='black')
+```
+
+# SDZWA skin
+```{r}
+# Extract skin SIDs
+skin_sids <- cheetah_info$SID[cheetah_info$Tissue == "Skin"]
+
+# Subset methylation data so only skin
+beta1_test_skin <- beta_sesame1[rownames(beta_sesame1) %in% skin_sids, ]
+beta2_test_skin <- beta_sesame2[rownames(beta_sesame2) %in% skin_sids, ]
+beta_test_skin <- rbind(beta1_test_skin,beta2_test_skin)
+
+# subset cheetah info to only have skin samples
+cheetah_info_skin <- cheetah_info[cheetah_info$SID %in% rownames(beta_test_skin), ]
+
+# arrange by cheetah_info_skin order
+beta_test_skin <- beta_test_skin[match(cheetah_info_skin$SID, rownames(beta_test_skin)), ]
+```
+
+Quick check with WCGNA
+```{r}
+# The following setting is important, do not omit.
+options(stringsAsFactors = FALSE);
+methylation_skin <- as.data.frame(beta_test_skin)
+
+datExpr00 <- methylation_skin;
+
+# check for genes and samples with too many missing values:
+datExpr00[] <- lapply(datExpr00, function(x) {
+    as.numeric(as.character(x)) #make numeric
+})
+
+gsg <- goodSamplesGenes(datExpr00, verbose = 3);
+gsg$allOK
+
+# If the last statement returns TRUE, all genes have passed the cuts. If not, we remove the offending genes and samples from the data:
+if (!gsg$allOK)
+{
+# Optionally, print the gene and sample names that were removed:
+if (sum(!gsg$goodGenes)>0)
+printFlush(paste("Removing genes:", paste(names(datExpr00)[!gsg$goodGenes], collapse = ", ")));
+if (sum(!gsg$goodSamples)>0)
+printFlush(paste("Removing samples:", paste(rownames(datExpr00)[!gsg$goodSamples], collapse = ", ")));
+# Remove the offending genes and samples from the data:
+datExpr00 <- datExpr00[gsg$goodSamples, gsg$goodGenes]
+}
+
+#Next we cluster the samples (in contrast to clustering genes that will come later) to see if there are any obvious outliers.
+sampleTree <- hclust(dist(datExpr00), method = "average");
+# Plot the sample tree: Open a graphic output window of size 12 by 9 inches
+# The user should change the dimensions if the window is too large or too small.
+sizeGrWindow(12,9)
+par(cex = 0.6);
+par(mar = c(0,4,2,0))
+plot(sampleTree, main = "Skin Sample Clustering", sub="", xlab="", cex.lab = 1.5,
+cex.axis = 1.5, cex.main = 2)
+abline(h = 15, col = "red");
+```
+
+Outlier removal
+```{r}
+# Remove by hand:
+outlier_IDs_skin <- c("ET0560TOX00458") #outlier clustering
+
+beta_test_skin <- beta_test_skin[!(rownames(beta_test_skin) %in% outlier_IDs_skin), ]
+
+# subset cheetah info to only have skin samples
+cheetah_info_skin <- cheetah_info[cheetah_info$SID %in% rownames(beta_test_skin), ]
+
+# arrange by cheetah_info_skin order
+beta_test_skin <- beta_test_skin[match(cheetah_info_skin$SID, rownames(beta_test_skin)), ]
+```
+
+Test on skin
+```{r}
+# Run model on new data
+EN_test_skin <- as.matrix(beta_test_skin)
+y.skin <- predict(best_model1,EN_test_skin, type = "response")
+
+# Inverse age function on output
+y.skin_age_inv <- age_inv_transformed(y.skin,ASM)
+
+# Output DF
+output_skin <- data.frame(cheetah_info_skin$SID,cheetah_info_skin$Age_yr,y.skin,y.skin_age_inv)
+colnames(output_skin) <- c("SID", "Age", "s0", "Age_inv")
+
+# Plot age vs DNAm age
+a <- output_skin$Age
+b <- output_skin$Age_inv
+cor0 <- round(cor(a,b),2)
+mae0 <- round(median(abs(a-b)),2)
+plot(a,b,xlab='Age',ylab='DNAm age',
+     main=paste0('CheetahClock Test Skin (n=',length(a),')\n','cor=',cor0,
+                 ', MAE=',mae0),
+     col='green4',xlim=c(-1,max(max(a),max(b))+1),
+     ylim=c(-1,max(max(a),max(b))+1),
+     cex.lab = 1.25) #axis label size
+points(a, b, col = 'green4', pch=16, cex=1.25)
+abline(0,1,lwd=2,lty=2,col="grey")
+model1=lm(b~a)
+abline(model1,lwd=2,lty=2,col='black')
+
+legend_labels <- c("SDZWA skin")
+legend_colors <- c("darkgreen")
+legend("bottomright", legend = legend_labels, fill = legend_colors)
+```
+
+Variance calculations
+```{r}
+# Sample data frame
+df_var_LOOCV <- data.frame(
+  SID = info_clock$SID,
+    predicted_age = info_clock$age_inv_trans,
+    actual_age = info_clock$Age
+)
+
+df_var_LOOCV$difference <- abs(df_var_LOOCV$predicted_age - df_var_LOOCV$actual_age)
+
+df_var_LOOCV$percent_variation <- (df_var_LOOCV$difference / df_var_LOOCV$actual_age) * 100
+
+print(df_var_LOOCV)
+write.csv(df_var_LOOCV, file = "CheetahClock_LOOCV_results.csv", row.names = TRUE)
+
+# Blood
+df_var_blood <- data.frame(
+  SID = output_blood$SID,
+    predicted_age = output_blood$Age_inv,
+    actual_age = output_blood$Age
+)
+
+df_var_blood$difference <- abs(df_var_blood$predicted_age - df_var_blood$actual_age)
+
+df_var_blood$percent_variation <- (df_var_blood$difference / df_var_blood$actual_age) * 100
+
+print(df_var_blood)
+write.csv(df_var_blood, file = "CheetahClock_blood_results.csv", row.names = TRUE)
+
+# Skin
+df_var_skin <- data.frame(
+  SID = output_skin$SID,
+    predicted_age = output_skin$Age_inv,
+    actual_age = output_skin$Age
+)
+
+df_var_skin$difference <- abs(df_var_skin$predicted_age - df_var_skin$actual_age)
+
+df_var_skin$percent_variation <- (df_var_skin$difference / df_var_skin$actual_age) * 100
+
+print(df_var_skin)
+write.csv(df_var_skin, file = "CheetahClock_skin_results.csv", row.names = TRUE)
+```
+
+
+## CheetahClock for sex prediction
+```{r}
+# Remove NA:
+NA_IDs = c("X204529320040_R04C02") # MCDB sample w sex=NA 	
+
+beta_sex <- beta_clock[!(rownames(beta_clock) %in% NA_IDs), ]
+
+# subset cheetah info to only have clock samples
+cheetah_info_sex <- cheetah_info[cheetah_info$SID %in% rownames(beta_sex), ]
+
+# arrange beta clock by cheetah_info_clock order
+beta_sex <- beta_sex[match(cheetah_info_sex$SID, rownames(beta_sex)), ]
+```
+
+Make binomial gmlnet with CV to find best lambda
+```{r}
+# Variables
+alpha <- 0.5
+n <- length(cheetah_info_sex$sex) #number of samples
+EN_methylation_data <- as.matrix(beta_sex)
+EN_sex <- cheetah_info_sex$sex
+
+# generate a lambda value using the "cv.glmnet()" function
+glmnet_cv_training_sex <- cv.glmnet(EN_methylation_data, EN_sex, alpha = alpha, family="binomial", nfolds = n)
+
+# Display the optimal lambda
+best_lambda_sex <- glmnet_cv_training_sex$lambda.min
+
+# Fit the best model using glmnet with the best lambda
+best_model_sex <- glmnet(EN_methylation_data, EN_sex, alpha = alpha, family = "binomial", lambda = best_lambda_sex)
+
+# Save model
+saveRDS(best_model_sex, "CheetahClock_sex.rds")
+
+# To make predictions on the same dataset
+predicted_prob <- predict(best_model_sex, EN_methylation_data, type = "response")
+
+# Convert probabilities to binary classification: "M" for Male, "F" for Female
+predicted_sex <- ifelse(predicted_prob >= 0.5, "M", "F")
+
+# add the predictions to DF
+cheetah_info_sex$predicted_sex <- as.vector(predicted_sex)
+```
+
+Inspect best_clock coefs
+```{r}
+#Inspect model coefficients (beta vals):
+coefs_sex <- as.matrix(coef(best_model_sex, s = best_lambda_sex))
+chosen_features_sex <- rownames(coefs_sex)[coefs_sex !=0]
+print(coefs_sex[chosen_features_sex, , drop=FALSE])
+number_chosen_features_sex <- length(chosen_features_sex)
+cat("number of chosen CpG sites:", number_chosen_features_sex, "\n")
+
+#save features
+cheetahclock_sex_coefs <- chosen_features_sex
+save(cheetahclock_sex_coefs, file <- "cheetahclock_sex_coefs.Rdata")
+
+sex_cpgs_coefs <- (coefs_sex[cheetahclock_sex_coefs, , drop=FALSE])
+as.data.frame(sex_cpgs_coefs)
+write.csv(sex_cpgs_coefs, file = "cheetahclock_sex_cpgs_coefs.csv", row.names = TRUE)
+```
+
+## CheetahClock sex validation (submission 2 data)
+```{r}
+# Extract skin SIDs
+submission2_sids <- cheetah_info$SID[cheetah_info$submission == "2"]
+
+# Subset methylation data so only skin
+beta_test_sex <- beta_sesame2[rownames(beta_sesame2) %in% submission2_sids, ]
+
+# subset cheetah info to only have submission2 samples
+cheetah_info_sex_test <- cheetah_info[cheetah_info$SID %in% rownames(beta_test_sex), ]
+
+# arrange by cheetah_info_sex_test
+cheetah_info_sex_test <- cheetah_info_sex_test[match(cheetah_info_sex_test$SID, rownames(beta_test_sex)), ]
+
+# Run model on new data
+EN_test_sex <- as.matrix(beta_test_sex)
+predicted_prob <- predict(best_model_sex,EN_test_sex, type = "response")
+
+# Convert probabilities to binary classification: "M" for Male, "F" for Female
+predicted_sex <- ifelse(predicted_prob >= 0.5, "M", "F")
+
+# Output DF
+output_sex <- data.frame(cheetah_info_sex_test$SID,cheetah_info_sex_test$sex,predicted_sex)
+colnames(output_sex) <- c("SID", "sex", "predicted_sex")
+
+# Calculate proportion agreement
+proportion_agreement <- sum(output_sex$sex == output_sex$predicted_sex) / nrow(output_sex)
+print(paste("Proportion Agreement:", proportion_agreement))
+
+# Find rows where the predicted sex does not match the actual sex
+disagreement_rows <- subset(output_sex, predicted_sex != sex)
+
+# Print the rows with disagreement
+disagreement_IDs <- disagreement_rows$SID
+cat("IDs with Disagreement:", disagreement_IDs, "\n")
+```
