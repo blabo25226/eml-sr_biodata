@@ -4,11 +4,16 @@
 # Directory Structure & Context
 プロジェクトのルートディレクトリには以下の要素が含まれる。
 * `MEb/` : Amir Erez氏の論文に付随する公式GitHubリポジトリ（旧名: Manuscript_EML_biophysics）。EMLベースの記号回帰や粗視化のベースラインとなるコード群。
-* `*.pdf` : 理論的背景となる論文ファイル。
-    * 対象論文のPDF
-        - @2605.02972v1.pdf : Non-Monotone Response Modules and Cascades from the EML Operator for Reduced Models of Biological Dynamics
-        - @2603.21852v2.pdf : All elementary functions from a single operator
-        -  
+* `age_cat/` : ネコの加齢クロックに関するデータやコード群。
+* `age_cheetah/` : チーターの加齢クロックに関するデータやコード群。
+* `age_human/` : ヒトの加齢クロックに関するデータやコード群。
+* `*.pdf` または URLリンク : 理論的背景となる論文ファイル。
+    * 対象論文
+        - EML : https://arxiv.org/abs/2603.21852
+        - MEb : https://arxiv.org/pdf/2605.02972
+        - ネコ : https://pmc.ncbi.nlm.nih.gov/articles/PMC8599556/pdf/11357_2021_Article_445.pdf
+        - チーター : https://pmc.ncbi.nlm.nih.gov/articles/PMC12798976/pdf/pone.0336127.pdf
+        - ヒト : https://www.nature.com/articles/s41514-022-00085-y
     * ※ 今後、比較手法や適用データに関する新しい論文PDFが追加される可能性が高い。
 
 # AI Agent Role & Core Directives
@@ -34,4 +39,4 @@
 * source.md: ここはリンクの貼り付けるところで基本的にあなたは編集しないが、参照することは許可する。
 * README.md: ここは基本的にあなたが編集する。内容は私が更新を求めたときに行う。日本語で一般的な論文やレポートのように書くこと。
 * AGENTS.md: この"AGENTS.md"は私の指示があった場合のみ編集を許可する。編集が必要な場合は私に指示を仰ぐこと。編集が終わったら変更点と修正した点をchat欄にまとめること。
-* self_"論文名"_overview_report.md: 新しい論文とそのフォルダが追加されたときはそのフォルダにself_"論文名"_overview_report.mdを追加して、その論文とそのコードを読み、 @self_MEb_overview_report.md を参考にして資料を作ること。
+* self_"フォルダ名"_overview_report.md: 新しい論文とそのフォルダが追加されたときはそのフォルダにself_"フォルダ"_overview_report.mdを追加して、その論文とそのコードを読み、 @self_MEb_overview_report.md を参考にして資料を作ること。
