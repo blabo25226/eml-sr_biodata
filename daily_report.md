@@ -15,6 +15,7 @@
 * `source.md` に新しい論文（ネコ、チーター、ヒトの加齢に関するエピジェネティック・クロック論文）のリンクを追記。
 * `AGENTS.md` に新たな運用ルール（4. 作業に関する規定：`daily_report.md`, `self_xxx_overview_report.md` の作成など）を追加。
 * AIエージェントに対し、追加されたディレクトリやファイルの確認、および `AGENTS.md` の `# Directory Structure & Context` セクションの更新を指示。
+* eml-srを実行するためのソースコード群を含むGithubフォルダ（`eml-sr/`）をプロジェクト内に追加。
 
 ### AI（エージェント）の作業
 * `source.md` および各新規フォルダ内のファイル（READMEやコードなど）を読み込み、内容を把握。
@@ -24,4 +25,5 @@
     * `age_cheetah/self_age_cheetah_overview_report.md`
     * `age_human/self_age_human_overview_report.md`
 * 上記概要資料について、既存の `self_MEb_overview_report.md` のフォーマット（論文の概要、フォルダの概要、略語・用語一覧）を踏襲して記述。
+* `eml-sr` フォルダの追加に伴い、`eml-sr/README.md` を読み込み、同様に概要資料（`eml-sr/self_eml-sr_overview_report.md`）を作成。
 * `daily_report.md`（本ファイル）に本日の作業内容を記録。
