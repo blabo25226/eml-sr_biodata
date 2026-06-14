@@ -177,4 +177,21 @@ https://www.github.com/AmirErez/Manuscript_EML_biophysics
 
 ---
 
-
+## 参考文献 (References)
+[1] Mark K. Transtrum, Benjamin B. Machta, Kevin S. Brown, Bryan C. Daniels, Christopher R. Myers, and James P. Sethna. Perspective: Sloppiness and emergent theories in physics, biology, and beyond. The Journal of Chemical Physics, 143(1):010901, July 2015.
+[2] Jamie A. Lopez and Amir Erez. Mathematical Modelling and Intuition in Microbiology: A Perspective. Environmental Microbiology, 28(4):e70266, 2026.
+[3] Philip Nelson. Physical Models of Living Systems: Probability, Simulation, Dynamics. Chiliagon Science, Philadelphia, PA, 2022.
+[4] Michael Schmidt and Hod Lipson. Distilling Free-Form Natural Laws from Experimental Data. Science, 324(5923):81–85, April 2009.
+[5] Silviu-Marian Udrescu and Max Tegmark. AI Feynman: A physics-inspired method for symbolic regression. Science Advances, 6(16):eaay2631, April 2020.
+[6] Miles Cranmer, Alvaro Sanchez Gonzalez, Peter Battaglia, Rui Xu, Kyle Cranmer, David Spergel, and Shirley Ho. Discovering Symbolic Models from Deep Learning with Inductive Biases. In Advances in Neural Information Processing Systems, volume 33, pages 17429–17442. Curran Associates, Inc., 2020.
+[7] Bryan C. Daniels and Ilya Nemenman. Automated adaptive inference of phenomenological dynamical models. Nature Communications, 6(1):8133, August 2015.
+[8] Steven L. Brunton, Joshua L. Proctor, and J. Nathan Kutz. Discovering governing equations from data by sparse identification of nonlinear dynamical systems. Proceedings of the National Academy of Sciences, 113(15):3932–3937, April 2016.
+[9] Samuel H. Rudy, Steven L. Brunton, Joshua L. Proctor, and J. Nathan Kutz. Data-driven discovery of partial differential equations. Science Advances, 3(4):e1602614, April 2017.
+[10] Andrzej Odrzywolek. All elementary functions from a single binary operator. arXiv:2603.21852 [cs.SC], 2026.
+[11] HILL A. V. The possible effects of the aggregation of the molecules of hemoglobin on its dissociation curves. J. Physiol., 40:iv–vii, 1910.
+[12] Robert M. Vogel, Amir Erez, and Grégoire Altan-Bonnet. Dichotomy of cellular inhibition by small-molecule inhibitors revealed by single-cell analysis. Nature Communications, 7(1):12428, September 2016.
+[13] Rebecca LaCroix, Benjamin Lin, Tae-Yun Kang, and Andre Levchenko. Complex effects of kinase localization revealed by compartment-specific regulation of protein kinase A activity. eLife, 11:e66869, February 2022.
+[14] Suchet Nanda, Abram Calderon, Arya Sachan, Thanh-Thuy Duong, Johannes Koch, Xiaoyi Xin, Djamschid Solouk-Stahlberg, Yao-Wen Wu, Perihan Nalbant, and Leif Dehmelt. Rho GTPase activity crosstalk mediated by Arhgef11 and Arhgef12 coordinates cell protrusion-retraction cycles. Nature Communications, 14(1):8356, December 2023.
+[15] Wolfgang Maass, Thomas Natschläger, and Henry Markram. Real-Time Computing Without Stable States: A New Framework for Neural Computation Based on Perturbations. Neural Computation, 14(11):2531–2560, November 2002.
+[16] Herbert Jaeger and Harald Haas. Harnessing Nonlinearity: Predicting Chaotic Systems and Saving Energy in Wireless Communication. Science, 304(5667):78–80, April 2004.
+[17] Kohei Nakajima. Physical reservoir computing—an introductory perspective. Japanese Journal of Applied Physics, 59(6):060501, May 2020.
