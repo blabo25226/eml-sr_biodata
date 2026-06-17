@@ -4,9 +4,9 @@ use pyo3::exceptions::{PyValueError, PyException};
 use numpy::{PyArray1, PyReadonlyArray1, PyReadonlyArray2, PyArrayMethods};
 use crate::{Searcher as RustSearcher, SearchConfig, SearchResult as RustSearchResult};
 
-create_exception!(eml_sr, EmlDimensionError, PyException);
-create_exception!(eml_sr, EmlComplexityError, PyException);
-create_exception!(eml_sr, EmlRuntimeError, PyException);
+create_exception!(eml_sr_model_first_AI, EmlDimensionError, PyException);
+create_exception!(eml_sr_model_first_AI, EmlComplexityError, PyException);
+create_exception!(eml_sr_model_first_AI, EmlRuntimeError, PyException);
 
 fn map_error(e: crate::EmlError) -> PyErr {
     match e {
@@ -199,8 +199,8 @@ fn convert_to_matrix(obj: Bound<'_, PyAny>) -> PyResult<Vec<Vec<f64>>> {
 }
 
 /// The main Python module entry point.
-#[pymodule]
-fn eml_sr(py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
+#[pymodule(name = "eml_sr_model_first_AI")]
+fn eml_sr_model_first_ai(py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PySearcher>()?;
     m.add_class::<PySearchResult>()?;
     

@@ -1,4 +1,4 @@
-import eml_sr
+import eml_sr_model_first_AI
 import numpy as np
 
 def main():
@@ -9,7 +9,7 @@ def main():
     # 1. Initialize the searcher
     # max_complexity=10 is a good starting point for discovery
     # beam_width=200 ensures fast search with low memory usage
-    searcher = eml_sr.Searcher(max_complexity=10, beam_width=500)
+    searcher = eml_sr_model_first_AI.Searcher(max_complexity=10, beam_width=500)
 
     # 2. Example: Identify a constant
     print("\n[Task] Identifying constant: 3.1415926535...")
