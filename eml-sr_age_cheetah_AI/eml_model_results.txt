@@ -1,0 +1,10 @@
+Formula: Plus(v_{3}, Plus(Log(v_{3}), EML(ArcSin(ArcCos(v_{0})), v_{0})))
+Python: (v_{3})+((np.log(v_{3}))+((np.exp(np.arcsin(np.arccos(v_{0}))) - np.log(v_{0}))))
+LaTeX: v_{3} + \ln(v_{3}) + e^{\arcsin(\arccos(v_{0}))} - \ln(v_{0})
+Complexity: 10
+
+Features mapping (v0, v1...):
+v0: cg10501210
+v1: cg12544505.2
+v2: cg23090567
+v3: cg10505126
