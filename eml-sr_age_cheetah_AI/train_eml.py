@@ -15,8 +15,8 @@ def main():
     # Target is Age_trans
     y = df['Age_trans'].values
     
-    # X is all columns except Age and Age_trans
-    feature_cols = [c for c in df.columns if c not in ['Age', 'Age_trans']]
+    # Use top 4 features as requested
+    feature_cols = ['cg10501210', 'cg12544505.2', 'cg23090567', 'cg10505126']
     X = df[feature_cols].values
     
     # Split data (80% train, 20% test)

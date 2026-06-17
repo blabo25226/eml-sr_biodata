@@ -132,15 +132,15 @@ def main():
     df = pd.read_csv('filtered_data.csv', index_col=0)
     y = df['Age_trans'].values
     
-    # Use top 3 CpGs from Elastic Net
-    top_cpgs = ['cg10501210', 'cg12544505.2', 'cg23090567']
+    # Use top 4 CpGs from Elastic Net
+    top_cpgs = ['cg10501210', 'cg12544505.2', 'cg23090567', 'cg10505126']
     X = df[top_cpgs].values
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     print(f"Train size: {X_train.shape[0]}, Test size: {X_test.shape[0]}")
     
     print("Generating AST expressions...")
-    exprs = generate_expressions(max_depth=3, max_nodes=5, num_vars=3)
+    exprs = generate_expressions(max_depth=3, max_nodes=5, num_vars=4)
     print(f"Generated {len(exprs)} expressions.")
     
     best_aic = float('inf')
