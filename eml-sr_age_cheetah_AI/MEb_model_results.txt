@@ -1,0 +1,12 @@
+MEb Modified Approach
+Canonical Formula: V0
+Parameters (y0, B, gate_a, gate_b, gate_c...): [ 5.51875845 -4.84677119]
+Train MSE: 5.3595
+Train AIC: 79.5493
+Test MAE: 1.8881
+Test R2: 0.4747
+
+Variables mapped:
+V0: cg10501210
+V1: cg12544505.2
+V2: cg23090567
