@@ -1,0 +1,18 @@
+Results for data_wgcna.csv (Top 5 by Test R2)
+==================================================
+Rank 1:
+  Complexity: 6
+  Train Error: 3.9543
+  Test R2: 0.3297
+  Test MAE: 4.5884
+  Formula: Divide(Exp(Exp(Tan(v_{4}))), v_{1})
+  LaTeX: \frac{e^{e^{\tan(v_{4})}}}{v_{1}}
+
+Rank 2:
+  Complexity: 4
+  Train Error: 4.2447
+  Test R2: 0.2860
+  Test MAE: 4.7516
+  Formula: Exp(EML(v_{4}, v_{1}))
+  LaTeX: e^{e^{v_{4}} - \ln(v_{1})}
+

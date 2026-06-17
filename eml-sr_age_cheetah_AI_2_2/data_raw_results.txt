@@ -1,0 +1,34 @@
+Results for data_raw.csv (Top 5 by Test R2)
+==================================================
+Rank 1:
+  Complexity: 7
+  Train Error: 3.4179
+  Test R2: 0.4264
+  Test MAE: 3.7868
+  Formula: Times(EML(v_{11}, v_{33}), EML(v_{39}, v_{0}))
+  LaTeX: e^{v_{11}} - \ln(v_{33}) \cdot e^{v_{39}} - \ln(v_{0})
+
+Rank 2:
+  Complexity: 6
+  Train Error: 3.6722
+  Test R2: 0.3325
+  Test MAE: 4.1639
+  Formula: Divide(Divide(Exp(v_{11}), v_{14}), v_{4})
+  LaTeX: \frac{\frac{e^{v_{11}}}{v_{14}}}{v_{4}}
+
+Rank 3:
+  Complexity: 3
+  Train Error: 4.6659
+  Test R2: 0.0700
+  Test MAE: 5.0099
+  Formula: Exp(Exp(v_{26}))
+  LaTeX: e^{e^{v_{26}}}
+
+Rank 4:
+  Complexity: 4
+  Train Error: 4.1028
+  Test R2: 0.0548
+  Test MAE: 5.2020
+  Formula: EML(Exp(v_{26}), v_{33})
+  LaTeX: e^{e^{v_{26}}} - \ln(v_{33})
+
