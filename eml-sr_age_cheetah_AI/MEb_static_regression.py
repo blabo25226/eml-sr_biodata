@@ -140,7 +140,7 @@ def main():
     print(f"Train size: {X_train.shape[0]}, Test size: {X_test.shape[0]}")
     
     print("Generating AST expressions...")
-    exprs = generate_expressions(max_depth=3, max_nodes=5, num_vars=4)
+    exprs = generate_expressions(max_depth=5, max_nodes=7, num_vars=4)
     print(f"Generated {len(exprs)} expressions.")
     
     best_aic = float('inf')
