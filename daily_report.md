@@ -55,3 +55,33 @@
 | Fig. 3 | Page 6 | 47行目 | `./age_cat/self_figure/fig3.png` |
 | Fig. 4 | Page 9 | 62行目 | `./age_cat/self_figure/fig4.png` |
 | Fig. 5 | Page 11 | 68行目 | `./age_cat/self_figure/fig5.png` |
+
+## 2026/06/16
+
+### 過去の作業内容（git commit履歴より抽出）
+* `male file`: ファイル作成・修正等。
+
+## 2026/06/17
+
+### 過去の作業内容（git commit履歴より抽出）
+* **PR #1 (20260616_create_eml-sr_age_cheetah_AI) マージ関連:**
+  * `Completed EML modeling and analysis reports`: EMLモデリングおよび解析レポートの作成完了。
+  * `Added MEb static regression adaptation and results`: MEbの静的回帰適応とその結果の追加。
+  * `Rewrote analysis report to focus on MEb adaptation as primary method`: 解析レポートをMEbの適応手法を主眼に置くようリライト。
+  * `Updated MEb and eml-sr regression and report to use top 4 features exclusively`: MEbおよびeml-srの回帰モデルとレポートについて、上位4つの特徴量のみを使用するようアップデート。
+  * `Updated MEb regression depth to 5 and added Elastic Net baseline to report`: MEbの回帰深度を5に更新し、Elastic Netベースラインをレポートに追加。
+  * `bit fix`: 軽微な修正。
+* **PR #2 (20266017_improvement_eml-sr_model_first) マージ関連:**
+  * `feat: implement native Constant Optimization (Model-First) for eml-sr`: eml-sr向けのネイティブな定数最適化（Model-First）の実装。
+  * `chore: rename python module to eml_sr_model_first_AI`: pythonモジュール名を `eml_sr_model_first_AI` にリネーム。
+  * `chore: cleanup old files and update README`: 旧ファイルのクリーンアップと README の更新。
+
+## 2026/06/18
+
+### 私（ユーザー）の作業
+* `nextplan.md` の作成・編集（git commit: `make nextplan`）。
+* AIエージェントに対し、コード編集に伴う `daily_report.md` の更新、およびマージ済み履歴の追記を指示。
+
+### AI（エージェント）の作業
+* `main` ブランチのgit履歴を確認し、マージ済みのコミット履歴（2026/06/16〜2026/06/18）を抽出。
+* 上記の履歴をもとに、`daily_report.md` へPR #1, PR #2の変更点などの過去の作業履歴と、本日の作業内容を追記。
