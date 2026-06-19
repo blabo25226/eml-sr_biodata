@@ -23,4 +23,4 @@ classifiers = [
 
 [tool.maturin]
 features = ["python", "full-math"]
-module-name = "eml_sr_model_first_AI"
+module-name = "eml_sr_model_second_AI"
