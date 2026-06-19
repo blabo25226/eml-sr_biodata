@@ -9,6 +9,8 @@
   * `src/engine/bfs.rs` : 定数ノード（`Num`, `Param`）のL1・L2ノルムを計算し、元のMSEに `MSE + alpha * (l1_ratio * L1 + 0.5 * (1 - l1_ratio) * L2)` の形でElastic Netのペナルティを加算する処理を追加。
   * `src/engine/optimizer.rs` : `refine_constants` および誤差計算関数にも `alpha` と `l1_ratio` を渡し、定数最適化時にもペナルティが考慮されるように修正。
   * `src/python.rs` : Python用バインディング関数の引数に `alpha` と `l1_ratio` を必須として追加。
+  * `example_python.py` : `alpha`, `l1_ratio` を引数に渡すように修正し、モジュール名を `eml_sr_model_second_AI` に変更。
+  * `pyproject.toml` : Pythonパッケージの `module-name` を `eml_sr_model_second_AI` に変更。
   * `src/main.rs` : テスト用コードの呼び出しを合わせるため、`alpha = 0.01`, `l1_ratio = 0.5` を渡して実行。
 * `cargo build` にてビルドが正常に通ることを確認し、動作確認を行った。
 
