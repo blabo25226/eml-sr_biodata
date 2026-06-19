@@ -1,0 +1,75 @@
+Results for Elastic Net EML-SR (Target: Age_trans)
+Parameters: alpha=0.01, l1_ratio=0.5
+==================================================
+Rank 1:
+  Complexity: 9
+  Train Error(Penalized): 2.5838
+  Test R2: 0.6065
+  Test MAE: 1.5785
+  Formula: Subtract(Times(Divide(v_{11}, v_{14}), EML(v_{29}, v_{2})), v_{28})
+  LaTeX: \frac{v_{11}}{v_{14}} \cdot e^{v_{29}} - \ln(v_{2}) - v_{28}
+
+Rank 2:
+  Complexity: 8
+  Train Error(Penalized): 2.8463
+  Test R2: 0.5463
+  Test MAE: 1.6420
+  Formula: Plus(Log(v_{26}), Divide(Divide(v_{11}, v_{14}), v_{4}))
+  LaTeX: \ln(v_{26}) + \frac{\frac{v_{11}}{v_{14}}}{v_{4}}
+
+Rank 3:
+  Complexity: 7
+  Train Error(Penalized): 3.0207
+  Test R2: 0.4859
+  Test MAE: 1.8075
+  Formula: Plus(Log(v_{21}), EML(ArcCos(v_{0}), v_{33}))
+  LaTeX: \ln(v_{21}) + e^{\arccos(v_{0})} - \ln(v_{33})
+
+Rank 4:
+  Complexity: 5
+  Train Error(Penalized): 3.4416
+  Test R2: 0.4723
+  Test MAE: 1.9631
+  Formula: Divide(Divide(v_{11}, v_{14}), v_{4})
+  LaTeX: \frac{\frac{v_{11}}{v_{14}}}{v_{4}}
+
+Rank 5:
+  Complexity: 6
+  Train Error(Penalized): 3.4134
+  Test R2: 0.4722
+  Test MAE: 1.9811
+  Formula: Divide(Divide(v_{11}, v_{14}), Sin(v_{4}))
+  LaTeX: \frac{\frac{v_{11}}{v_{14}}}{\sin(v_{4})}
+
+Rank 6:
+  Complexity: 4
+  Train Error(Penalized): 4.1963
+  Test R2: 0.3745
+  Test MAE: 2.1755
+  Formula: Subtract(Inv(v_{14}), v_{0})
+  LaTeX: \frac{1}{v_{14}} - v_{0}
+
+Rank 7:
+  Complexity: 3
+  Train Error(Penalized): 4.8340
+  Test R2: 0.2208
+  Test MAE: 2.5366
+  Formula: Tan(ArcCos(v_{14}))
+  LaTeX: \tan(\arccos(v_{14}))
+
+Rank 8:
+  Complexity: 2
+  Train Error(Penalized): 5.1277
+  Test R2: 0.1559
+  Test MAE: 2.6465
+  Formula: Inv(v_{14})
+  LaTeX: \frac{1}{v_{14}}
+
+Rank 9:
+  Complexity: 10
+  Train Error(Penalized): 1.9821
+  Test R2: -0.1172
+  Test MAE: 2.7552
+  Formula: Divide(Subtract(EML(ArcCos(v_{14}), v_{0}), Inv(v_{11})), Sqrt(v_{27}))
+  LaTeX: \frac{e^{\arccos(v_{14})} - \ln(v_{0}) - \frac{1}{v_{11}}}{\sqrt{v_{27}}}
+
