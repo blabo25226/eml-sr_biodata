@@ -4,9 +4,9 @@ use pyo3::exceptions::{PyValueError, PyException};
 use numpy::{PyArray1, PyReadonlyArray1, PyReadonlyArray2, PyArrayMethods};
 use crate::{Searcher as RustSearcher, SearchConfig, SearchResult as RustSearchResult};
 
-create_exception!(eml_sr_model_first_AI, EmlDimensionError, PyException);
-create_exception!(eml_sr_model_first_AI, EmlComplexityError, PyException);
-create_exception!(eml_sr_model_first_AI, EmlRuntimeError, PyException);
+create_exception!(eml_sr_model_second_AI, EmlDimensionError, PyException);
+create_exception!(eml_sr_model_second_AI, EmlComplexityError, PyException);
+create_exception!(eml_sr_model_second_AI, EmlRuntimeError, PyException);
 
 fn map_error(e: crate::EmlError) -> PyErr {
     match e {
@@ -164,9 +164,10 @@ impl PySearcher {
     }
 
     /// Identifies a closed-form expression for a scalar constant.
-    fn recognize_constant(&self, value: f64) -> PyResult<PySearchResult> {
+    #[pyo3(signature = (value, alpha=0.0, l1_ratio=0.0))]
+    fn recognize_constant(&self, value: f64, alpha: f64, l1_ratio: f64) -> PyResult<PySearchResult> {
         self.inner
-            .recognize_constant(value)
+            .recognize_constant(value, alpha, l1_ratio)
             .map(|inner| PySearchResult { inner })
             .map_err(map_error)
     }
@@ -199,8 +200,8 @@ fn convert_to_matrix(obj: Bound<'_, PyAny>) -> PyResult<Vec<Vec<f64>>> {
 }
 
 /// The main Python module entry point.
-#[pymodule(name = "eml_sr_model_first_AI")]
-fn eml_sr_model_first_ai(py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
+#[pymodule(name = "eml_sr_model_second_AI")]
+fn eml_sr_model_second_ai(py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PySearcher>()?;
     m.add_class::<PySearchResult>()?;
     
