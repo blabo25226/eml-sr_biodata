@@ -32,7 +32,7 @@ def main() -> None:
         eml_main()
 
     if "all" in steps or "link" in steps:
-        from train_link_sr import main as link_main
+        from train_link_g_sr import main as link_main
 
         link_main()
 

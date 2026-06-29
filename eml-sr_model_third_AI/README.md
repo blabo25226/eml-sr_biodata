@@ -5,8 +5,8 @@
 ## 概要
 
 1. **`preprocess_clock.R`** — GEO GSE310779 から WGCNA QC・ComBat・ASM・`glmnet` LOOCV
-2. **`train_eml_sr.py`** — `eml-sr_model_first_AI` で CpG → `age_trans` の記号回帰
-3. **`train_link_sr.py`** — 単変量 SR でリンク関数 \(g(\text{Age})\) を探索
+2. **`train_eml_sr.py`** — `eml-sr_model_first_AI` で CpG → `age_trans` の多変量記号回帰
+3. **`train_link_g_sr.py`** — GLM リンク $g$ を SR で探索（$g(\texttt{age\_trans}) \approx \eta$、$\eta$ は 15 CpG の Elastic Net）
 
 ## 依存関係
 
@@ -48,8 +48,11 @@ python run_pipeline.py eml link # SR のみ（data/ がある場合）
 | `data/clock_samples.csv` | メタデータ + `age_trans` |
 | `data/beta_combat.csv` | ComBat 後 β |
 | `data/selected_cpgs.csv` | glmnet 非ゼロ CpG |
-| `data/baseline_loocv.csv` | 線形 EN LOOCV |
+| `data/baseline_loocv.csv` | 線形 EN LOOCV（§3） |
+| `data/linear_predictor.csv` | §5 用 $\eta$ と `age_trans` |
 | `results/eml_sr_results.txt` | 多変量 SR 結果 |
-| `results/link_sr_results.txt` | リンク SR 結果 |
+| `results/link_g_sr_results.txt` | リンク $g$ の SR 結果 |
+| `results/link_g_loocv.csv` | §5 LOOCV 暦年齢予測 |
+| `results/link_g_summary.csv` | Identity / SR link / §3 比較 |
 
-詳細は `WORK_PLAN.md` と `analysis_third_AI_report.md` を参照。
+詳細は `WORK_PLAN.md`、`WORK_PLAN_section5.md`、`analysis_third_AI_report.md` を参照。

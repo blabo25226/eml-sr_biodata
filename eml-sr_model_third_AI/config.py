@@ -30,3 +30,7 @@ BETA_COMBAT_CSV = DATA_DIR / "beta_combat.csv"
 SELECTED_CPGS_CSV = DATA_DIR / "selected_cpgs.csv"
 BASELINE_LOOCV_CSV = DATA_DIR / "baseline_loocv.csv"
 SKIN_SAMPLES_CSV = DATA_DIR / "skin_samples.csv"
+LINEAR_PREDICTOR_CSV = DATA_DIR / "linear_predictor.csv"
+
+# §5 link SR (glmnet uses alpha=0.5; sklearn EN alpha via CV in script)
+ENET_ALPHA = 0.01  # fallback if CV not used

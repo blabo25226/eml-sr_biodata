@@ -122,3 +122,18 @@
 * `eml-sr_model_first_AI` を `maturin develop` でビルドし、多変量 SR・リンク SR を実行。
 * 結果レポート `analysis_third_AI_report.md` を作成。
 * ※ `eml-sr_model_first_AI/README.md` が欠落しており maturin 用スタブを一時作成（ビルド目的）。
+
+### §5 再設計（GLM リンク $g$）— 承諾後の追記
+
+#### 私（ユーザー）の作業
+* §5 を GLM 定式化（$E(\texttt{age\_trans})=g^{-1}(\eta)$）に修正する方針を承諾。
+* CpG は **上位 15 に限定**（§4 と同一）。
+* LOOCV は **$\eta$ を fold ごとに再学習**、**$g$ は全データ SR で固定**（限界を `analysis_third_AI_report.md` に明記）。
+* 比較は identity link vs SR link（§3 ベースライン参照）。ルート `README.md` は §5 用に更新しない。
+
+#### AI（エージェント）の作業
+* 旧 `train_link_sr.py` を削除し、`train_link_g_sr.py` を新規実装（`utils.py` に `invert_link` / `asm_inv_transform` 等）。
+* `train_link_g_sr.py` 実行完了（15 CpG、$n=48$）。
+* 結果: 非線形 $g$ は定義域で NaN となる候補を除外し、**最良は恒等リンク $g(v_0)=v_0$**（link MSE $=0.517$、$r=0.971$）。
+* LOOCV（暦年齢）: identity $r=0.946$、MAE $=0.93$；SR link $r=0.949$、MAE $=0.92$。
+* `analysis_third_AI_report.md` §5–§8 を更新（LOOCV 限界の明記含む）。`README.md`（third_AI 内）を更新。
