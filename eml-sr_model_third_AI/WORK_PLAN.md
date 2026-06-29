@@ -8,7 +8,7 @@
 
 ## 1. 目的
 
-チーター GSE310779（GEO Series Matrix）を出発点に、原著 `age_cheetah/CheetahClock_age_sex.Rmd` に準じた前処理パイプラインを Python で再実装し、その上で
+チーター GSE310779（GEO Series Matrix）を出発点に、原著 `age_cheetah/CheetahClock_age_sex.Rmd` に準じた前処理を **R** で実装し、その上で
 
 1. **線形 Elastic Net + LOOCV**（論文ベースライン再現）
 2. **`eml-sr_model_first_AI` による多変量シンボリック回帰**（CpG → 変換年齢）

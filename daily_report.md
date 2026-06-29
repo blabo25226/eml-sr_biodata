@@ -106,3 +106,19 @@
 * `README.md` の方法・結果・フォルダ一覧を3段階構成に更新（第1段階: `preprocess.py`/`train_eml.py`、第2段階: `eml-sr_model_first_AI`、第3段階: `eml-sr_model_second_AI`）。
 * `README.md` に「チーターのエピジェネティック・クロック」節を追加（DNAメチル化、CpG・beta値、CheetahClock、GSE310779、ASM/`Age_trans`）。
 * MEb 結果表および第1段階の記述から Random Forest 比較を削除。
+
+## 2026/06/30（eml-sr_model_third_AI）
+
+### 私（ユーザー）の作業
+* `eml-sr_model_third_AI` 作業計画書（`WORK_PLAN.md`）の確認。
+* パラメータ決定: CpG 上位10–20（デフォルト15）、`beam_width=500`（`config.py` で変更可）、皮膚は学習除外、リンク SR は案 A・B 両方。
+* 前処理言語として **案 A（R 前処理 + Python SR）** を選択し、計画を**承諾**。
+
+### AI（エージェント）の作業
+* ブランチ `20260630_create_model_third` 上で `eml-sr_model_third_AI/` を新規実装。
+* **R**: `preprocess_clock.R`（GEO 読込、WGCNA QC、ComBat、ASM、`glmnet` LOOCV）、`install_r_packages.R`。
+* **Python**: `config.py`, `train_eml_sr.py`, `train_link_sr.py`, `run_pipeline.py`, `utils.py`, `README.md`。
+* R 前処理実行結果: \(n=48\) サンプル、LOOCV \(r=0.758\)、MAE \(=1.88\)、非ゼロ CpG 42。
+* `eml-sr_model_first_AI` を `maturin develop` でビルドし、多変量 SR・リンク SR を実行。
+* 結果レポート `analysis_third_AI_report.md` を作成。
+* ※ `eml-sr_model_first_AI/README.md` が欠落しており maturin 用スタブを一時作成（ビルド目的）。
