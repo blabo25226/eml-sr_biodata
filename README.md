@@ -100,6 +100,25 @@ MEb（`MEb/`、Amir Erez 論文の実装）は、EML演算子およびその変�
 
 $\alpha$（ペナルティ強度）と `l1_ratio`（L1/L2のバランス）は実行時に指定する。実行スクリプトは `eml-sr_age_cheetah_AI/train_eml_second_AI.py`。
 
+#### 第4段階：`eml-sr_model_fourth_AI`（5手法の LOOCV 比較）
+
+第3段階（`eml-sr_model_third_AI/`）で原著準拠の R 前処理（WGCNA, ComBat, ASM, `glmnet` LOOCV）を確立したうえで、**リンク関数の記号回帰は精度面で不適と判断し廃止**した。第4段階では、同一前処理の上で次の5手法を **MSE・$R^2$・$r$・MAE** により横並び比較する（詳細: `eml-sr_model_fourth_AI/WORK_PLAN.md`, `analysis_fourth_AI_report.md`）。
+
+| Step | スクリプト | 手法 | 入力 CpG |
+|:---:|:---|:---|:---:|
+| 0 | `step0_baseline_enet.py` | R `glmnet` Elastic Net + 厳密 LOOCV | 全選択（42） |
+| 1 | `step1_eml_sr.py` | EML-SR（`eml-sr_model_first_AI`） | \|coef\| 上位 20 |
+| 2 | `step2_pysr.py` | PySR（遺伝的プログラミング） | 同上 |
+| 3 | `step3_neural_sr.py` | EQL スタイルニューラル SR（PyTorch） | 同上 |
+| 4 | `step4_sparse_sim.py` | Sparse Simple Index Model（$\eta=\beta^\top x$, $g(\eta)$ は 3 次 B スプライン） | 同上 |
+
+- **前処理**: `preprocess_clock.R`（原著 `CheetahClock_age_sex.Rmd` 準拠）。出力は `data/` に独立保存。
+- **変数選択**: Step 1–4 は `glmnet` の \|coef\| 上位 **20** CpG を固定入力とする。記号回帰系は候補式 **上位 10 件**を出力。
+- **LOOCV**: Step 0 は fold 内 `glmnet` 再学習の厳密 LOOCV。Step 1–2 は構造固定（全データで式を探索し同一式で各点を評価）。Step 3–4 は fold ごとにモデル族固定で再学習。
+- **実行**: `python run_pipeline.py`（PySR は Julia 要；`config.py` の `JULIA_EXE` を設定）。
+
+**データ上の限界**: 本 Run は GEO **GSE310779** の肝臓＋血液のみ（$n=48$）を学習に用いた。原著の CheetahClock 学習セット（SDZWA 肝臓 38 + **MCDB 血液 14** = 52）は、MCDB データが同梱されていなかったため再現できていない。MCDB 14 プロファイルは [GSE223748](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE223748) から入手可能であり、第5段階で論文と同一構成のデータセットを組み立てる予定である。
+
 ---
 
 ## 結果
@@ -159,15 +178,41 @@ $$\frac{v_{11}}{v_{14}} \cdot e^{v_{29}} - \ln(v_2) - v_{28}$$
 
 第2段階（\(R^2\) = 0.6195）と比べ精度はわずかに低下したが、平方根などの強引なフィッティングが剪定され、四則演算と指数・対数のみからなる**解釈しやすい数式**が得られた。
 
+### 第4段階：`eml-sr_model_fourth_AI`（5手法・LOOCV 比較）
+
+出典: `eml-sr_model_fourth_AI/analysis_fourth_AI_report.md`, `results/comparison_summary.csv`
+
+**前処理（Step 0 ベースライン）**: 学習コホート $n=48$（liver + blood）、非ゼロ CpG 42、厳密 LOOCV で暦年齢 $r \approx 0.758$、MAE $\approx 1.88$ 年。
+
+**全手法 LOOCV 比較**（暦年齢 $r$, MAE は年）:
+
+| 手法 | 特徴数 | LOOCV $R^2$ | LOOCV $r$ | LOOCV MAE |
+| :--- | :---: | :---: | :---: | :---: |
+| Elastic Net (0) | 42 | 0.578 | 0.758 | 2.51 |
+| EML-SR (1) | 20 | 0.473 | 0.744 | 3.09 |
+| PySR (2) | 20 | 0.868 | 0.943 | 1.48 |
+| EQL neural SR (3) | 20 | $-0.057$ | $-0.157$ | 5.00 |
+| Sparse SIM (4) | 20 | 0.960 | 0.976 | 0.86 |
+
+**主な知見**:
+
+- **Elastic Net** は原著準拠前処理の安定ベースライン。原著報告（$r \approx 0.97$）との差は、MCDB 血液 14 サンプル未含有による学習コホートの相違が主因と考えられる。
+- **PySR** は LOOCV $r \approx 0.94$ と EN を上回り、$\log$・$\sin$ 等を含む解釈可能な候補式を複数列挙できた。
+- **EML-SR** は低複雑度の有理式（例: 3 CpG の比）を発見するが、本設定では EN・PySR に劣る。
+- **Sparse SIM** は数値上最良（$r \approx 0.98$, MAE $\approx 0.86$ 年）だが、$n=48$ に対するスプライン自由度は過大になりうる。エピジェネティック時計の標準形（線形 $\eta$ + 固定リンク）からは外れる。
+- **EQL** は本 Run では学習が破綻し（訓練 $r$ が負）、実用には不向きと判断した。
+
+第3段階で試した**リンク関数の記号回帰**は、第4段階の結果を踏まえ今後の主軸からは外す。同様に **EQL 型ニューラル SR** と **Sparse SIM** も、時計関数の同定という目的には適さないと判断した（`nextplan.md`）。
+
 ---
 
 ## 今後の展望
 
 `nextplan.md` に基づく今後の計画は以下の通りである。
 
-1. **過学習抑制アルゴリズムの実装**: 第3段階（定数の事後計算 + Elastic Net 適用）に、過学習抑制のオン/オフ機構を追加し、エピジェネティック時計関数の同定を再試行する。
-2. **一般化線形モデル（GLM）への拡張**: リンク関数そのものをシンボリック回帰で求める。
-3. **ニューラルシンボリック回帰**: 上記アプローチをニューラルネットワークと記号回帰のハイブリッドで実現する。
+1. **第5段階（`eml-sr_model_fifth_AI` 予定）**: MCDB からチーター血液メチル化 14 プロファイルを [GSE223748](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE223748) 等で入手し、原著と同一の学習セット（SDZWA 肝臓 38 + MCDB 血液 14 = 52）を構成したうえで、第4段階と同様の比較を実施する。
+2. **第5段階の対象手法**: Step 0（Elastic Net 線形回帰・論文再現）、Step 1（EML-SR）、Step 2（PySR）に絞る。リンク関数 SR・EQL・Sparse SIM は第4段階の結果により採用しない。
+3. **過学習抑制**: 第2・第3段階で開発した定数最適化・Elastic Net 損失の改良は、EML-SR 探索の安定化に引き続き活用する。
 
 ---
 
@@ -196,6 +241,8 @@ $$\frac{v_{11}}{v_{14}} \cdot e^{v_{29}} - \ln(v_2) - v_{28}$$
 | `eml-sr/` | eml-sr 原版ライブラリ（第1段階で使用） |
 | `eml-sr_model_first_AI/` | 第2段階：定数最適化（Model-First）改良版 |
 | `eml-sr_model_second_AI/` | 第3段階：MSE + 定数 Elastic Net 損失関数改良版 |
+| `eml-sr_model_third_AI/` | 原著準拠 R 前処理の確立・リンク関数 SR の試行 |
+| `eml-sr_model_fourth_AI/` | 第4段階：5手法 LOOCV 比較（EN, EML-SR, PySR, EQL, Sparse SIM） |
 | `eml-sr_age_cheetah_AI/` | チーター実験一式（`preprocess.py`, `train_eml.py`, `train_eml_second_AI.py` 等） |
 
 作業ルールおよびドキュメント管理の詳細は `AGENTS.md` を参照。
