@@ -137,3 +137,34 @@
 * 結果: 非線形 $g$ は定義域で NaN となる候補を除外し、**最良は恒等リンク $g(v_0)=v_0$**（link MSE $=0.517$、$r=0.971$）。
 * LOOCV（暦年齢）: identity $r=0.946$、MAE $=0.93$；SR link $r=0.949$、MAE $=0.92$。
 * `analysis_third_AI_report.md` §5–§8 を更新（LOOCV 限界の明記含む）。`README.md`（third_AI 内）を更新。
+
+## 2026/07/01
+
+### 私（ユーザー）の作業
+* `analysis_third_AI_report.md` と `nextplan.md` に基づき fourth フェーズの作業計画を依頼。
+* 作業計画書（`eml-sr_model_fourth_AI/WORK_PLAN.md`）の内容を確認し、§9 の設計判断（20 CpG、惜しかった式 Top 10 固定、EQL、構造固定 LOOCV、前処理コピー）を承諾。
+* ブランチ `20260701_create_model_fourth_AI` を指定。
+
+### AI（エージェント）の作業
+* ブランチ `20260701_create_model_fourth_AI` を作成・チェックアウト。
+* `eml-sr_model_fourth_AI/WORK_PLAN.md` を作成（後にステータスを実装済みに更新）。
+* パイプライン一式を実装:
+  * `config.py`, `metrics.py`, `utils.py`, `preprocess_clock.R`, `install_r_packages.R`
+  * `step0_baseline_enet.py` 〜 `step4_sparse_sim.py`, `step2_pysr.py`, `step3_neural_sr.py`
+  * `run_pipeline.py`, `compare_results.py`, `README.md`, `requirements.txt`
+* R 前処理を実行（$n=48$, LOOCV $r=0.758$, 42 CpG）。
+* Python Step 0, 1, 3, 4 を実行。PySR（Step 2）は `pysr` 未導入のためスキップ。
+* 結果レポート `analysis_fourth_AI_report.md` を作成。
+* LOOCV 実装の修正（EQL forward バグ、SIM/EQL の fold 内再学習）。
+
+### 追記（レポート・PySR 実行）
+
+#### 私（ユーザー）の作業
+* Step 4 の $g$ 特定の確認、全 Step の数式を `analysis_fourth_AI_report.md` に記載するよう指示。
+* Step 2（PySR）の環境構築と実行を指示。
+
+#### AI（エージェント）の作業
+* Step 0: `glmnet_coefs_full.csv` エクスポート、`step0_linear_formula.txt` 生成。
+* Step 4: $g(\eta)$ の B スプライン係数を `step4_sim_g_coefficients.csv` に出力；$\eta$ 係数・$g$ を `step4_sim_results.txt` に明記。
+* PySR: Julia 1.12.6 をインストールし Step 2 を実行（Top 10 候補、最良 LOOCV $r\approx 0.94$）。
+* `analysis_fourth_AI_report.md` を全 Step の数式（候補含む）で全面更新；`comparison_summary.csv` に PySR を反映。
