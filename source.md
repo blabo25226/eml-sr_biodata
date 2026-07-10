@@ -8,3 +8,6 @@ https://pmc.ncbi.nlm.nih.gov/articles/PMC8599556/pdf/11357_2021_Article_445.pdf
 https://pmc.ncbi.nlm.nih.gov/articles/PMC12798976/pdf/pone.0336127.pdf
 ヒト
 https://www.nature.com/articles/s41514-022-00085-y
+
+horvath clock
+https://pmc.ncbi.nlm.nih.gov/articles/PMC4015143/#_ad93_
