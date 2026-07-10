@@ -45,7 +45,7 @@ def main() -> None:
         s0()
 
     if "all" in steps or "1" in steps:
-        from step1_eml_sr import main as s1
+        from step1_eml_sr_fable import main as s1
 
         s1()
 

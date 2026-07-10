@@ -42,6 +42,12 @@ def asm_inv_transform(y: np.ndarray, asm: float = 2.0, k: float = 0.2) -> np.nda
     return out
 
 
+def predict_fable(cand, X: np.ndarray) -> np.ndarray:
+    """Evaluate an eml-sr_fable SearchResult on sample matrix X."""
+    preds = cand.predict(X.tolist())
+    return np.asarray(preds, dtype=float)
+
+
 def load_sr_data():
     """Load top N CpGs and age_trans for symbolic-regression steps."""
     meta = pd.read_csv(config.CLOCK_SAMPLES_CSV, index_col=0)

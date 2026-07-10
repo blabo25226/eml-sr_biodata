@@ -33,12 +33,23 @@ def main() -> None:
     if step0.exists():
         rows.append(pd.read_csv(step0).iloc[0].to_dict())
 
-    step1 = config.RESULTS_DIR / "step1_eml_sr_candidates.csv"
+    step1 = config.RESULTS_DIR / "step1_eml_sr_fable_candidates.csv"
     if step1.exists() and len(pd.read_csv(step1)) > 0:
         df = pd.read_csv(step1)
         best = df.iloc[0]
         rows.append(_row(
-            "eml_sr",
+            "eml_sr_fable",
+            config.N_CPG_FOR_SR,
+            best.get("formula", ""),
+            {c: best.get(c) for c in df.columns if c.startswith("loocv_")},
+        ))
+
+    cons = config.RESULTS_DIR / "step1_eml_sr_fable_conservative.csv"
+    if cons.exists() and len(pd.read_csv(cons)) > 0:
+        df = pd.read_csv(cons)
+        best = df.iloc[0]
+        rows.append(_row(
+            "eml_sr_fable_conservative",
             config.N_CPG_FOR_SR,
             best.get("formula", ""),
             {c: best.get(c) for c in df.columns if c.startswith("loocv_")},

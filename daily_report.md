@@ -194,3 +194,26 @@
 * `replicate_paper_enet.R` を実装（肝 38 = クラスタ外れ値 4 + stillborn 3、MCDB 血 14、$n=52$）。
 * 論文 Rmd と同一の LOOCV 手順で **$r \approx 0.983$**, MAE $\approx 0.65$ 年、非ゼロ CpG **52** を確認（論文: $r \approx 0.97$, MAE $\approx 0.86$）。
 * 標準 LOOCV は $r \approx 0.70$ と低いことを確認・レポートに明記。
+
+### 追記（eml-sr_fable 記号回帰）
+
+#### 私（ユーザー）の作業
+* 論文本番データで `eml-sr_fable` によるシンボリック回帰を fifth に実装するよう指示。
+
+#### AI（エージェント）の作業
+* `step1_eml_sr_fable.py` を実装（`manual_eml-sr_fable.md` 準拠、節約的タイブレーク、構造固定 LOOCV）。
+* `config.py` に `FABLE_*` 設定、`utils.predict_fable`、パイプライン・比較表を更新。
+* 実行結果: LOOCV $r \approx 0.974$、MAE $\approx 0.82$ 年（論文 EN $r \approx 0.97$ に匹敵）。
+
+### 追記（レポートへの数式・考察追記）
+
+#### 私（ユーザー）の作業
+* `analysis_fifth_AI_report.md` に eml-sr_fable の獲得式（`step1_eml_sr_fable_results.md`）と数式考察を有効数字 4 桁で載せるよう指示。
+
+#### AI（エージェント）の作業
+* `analysis_fifth_AI_report.md` §6 を拡充: CpG 対応表、Rank 1–4 の数式、生物学的・統計的考察、CheetahClock との対比を追記。
+
+#### AI（エージェント）の作業（eml-sr_fable）
+* `step1_eml_sr_fable.py` を実装（`eml-sr_fable` API、節約的タイブレーク、構造固定 LOOCV）。
+* 論文データ $n=52$ で実行: LOOCV $r \approx 0.974$, MAE $\approx 0.82$ 年（論文 EN に匹敵）。
+* `config.py`, `run_pipeline.py`, `compare_results.py`, `README.md` を更新。
